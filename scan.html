@@ -26,7 +26,7 @@
     const scanBtn = document.getElementById("scanBtn");
     const resultDiv = document.getElementById("result");
 
-    // 구글 앱스 스크립트 웹앱 URL 넣기 (4단계-4에서 만들 예정)
+    // 구글 앱스 스크립트 웹앱 URL 넣기 (나중에 수정 필요)
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx.../exec";
 
     // 위치 정보 요청 함수
@@ -72,26 +72,24 @@
 
     // QR 코드 스캔 시작
     scanBtn.addEventListener("click", () => {
-      // html5-qrcode 라이브러리로 QR코드 스캔 가능
       const html5QrCode = new Html5Qrcode("reader");
 
-      // 카메라 권한 요청, 카메라 ON
       Html5Qrcode.getCameras()
         .then((devices) => {
           if (devices && devices.length) {
-            // 첫 번째 카메라 선택
-            const cameraId = devices[0].id;
+            // 후면 카메라 우선 선택
+            const backCamera = devices.find(camera => camera.label.toLowerCase().includes('back')) || devices[0];
+            const cameraId = backCamera.id;
 
             html5QrCode.start(
               cameraId,
               { fps: 10, qrbox: 250 },
               (decodedText) => {
-                // 스캔 성공하면 위치 및 시간과 함께 구글에 전송
                 html5QrCode.stop();
                 getLocationAndSend(decodedText);
               },
               (errorMessage) => {
-                // 스캔 실패 시 (무시 가능)
+                // 스캔 실패 시 무시
               }
             );
           } else {
