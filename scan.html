@@ -2,14 +2,108 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <title>QR코드 출석</title>
   <style>
-    body { font-family: sans-serif; padding: 20px; max-width: 500px; margin: auto; }
-    button { font-size: 20px; padding: 10px; margin-top: 30px; cursor: pointer; width: 100%; }
-    #result { margin-top: 20px; }
+    html, body {
+      margin: 0; padding: 0; height: 100%;
+      font-family: sans-serif;
+      background: #f9f9f9;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      overflow: hidden;
+    }
+
+    body {
+      padding: 10px;
+      box-sizing: border-box;
+      position: relative;
+    }
+
+    /* 뒤로가기 버튼 스타일 */
+    #backBtn {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      font-size: 18px;
+      background: none;
+      border: none;
+      color: #2e7d32;
+      cursor: pointer;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      user-select: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+      transition: background-color 0.3s ease;
+    }
+
+    #backBtn:hover {
+      background-color: rgba(46,125,50,0.1);
+    }
+
+    h2 {
+      margin: 10px 0;
+      font-size: 24px;
+      text-align: center;
+      width: 100%;
+    }
+
+    p {
+      font-size: 18px;
+      width: 100%;
+      text-align: center;
+      margin: 5px 0 15px 0;
+      font-weight: 600;
+    }
+
+    #scanBtn {
+      font-size: 22px;
+      padding: 15px;
+      width: 100%;
+      cursor: pointer;
+      background-color: #2e7d32;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+      transition: background-color 0.3s ease;
+    }
+
+    #scanBtn:hover {
+      background-color: #276426;
+    }
+
+    #result {
+      margin-top: 15px;
+      font-size: 18px;
+      font-weight: 600;
+      color: #444;
+      text-align: center;
+      min-height: 30px;
+      width: 100%;
+    }
+
+    #reader {
+      margin-top: 15px;
+      width: 100%;
+      flex-grow: 1;
+      max-height: 70vh;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 0 10px rgba(0,0,0,0.15);
+      background: black;
+    }
   </style>
 </head>
 <body>
+  <!-- 뒤로가기 버튼 -->
+  <button id="backBtn">&lt; 뒤로가기</button>
+
   <h2>QR코드 출석</h2>
   <p>팀: <span id="teamName"></span></p>
 
@@ -19,17 +113,24 @@
 
   <script src="https://unpkg.com/html5-qrcode"></script>
   <script>
-    // 저장소에서 팀 불러오기
     const team = localStorage.getItem("team") || "알 수 없음";
     document.getElementById("teamName").textContent = team;
 
     const scanBtn = document.getElementById("scanBtn");
     const resultDiv = document.getElementById("result");
+    const backBtn = document.getElementById("backBtn");
 
-    // 구글 앱스 스크립트 웹앱 URL 넣기 (나중에 수정 필요)
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx.../exec";
 
-    // 위치 정보 요청 함수
+    backBtn.addEventListener("click", () => {
+      const isLoggedIn = localStorage.getItem("isLoggedIn");
+      if (isLoggedIn === "true") {
+        location.href = "main.html"; // 로그인 완료 후 이동할 메인 페이지 경로로 수정하세요
+      } else {
+        location.href = "login.html"; // 로그인 전 이동할 로그인 페이지 경로로 수정하세요
+      }
+    });
+
     function getLocationAndSend(qrData) {
       if (!navigator.geolocation) {
         alert("위치 정보를 지원하지 않는 브라우저입니다.");
@@ -42,7 +143,6 @@
           const now = new Date();
           const timestamp = now.toLocaleString();
 
-          // 데이터 전송용 객체
           const data = {
             team: team,
             qr: qrData,
@@ -51,11 +151,10 @@
             timestamp: timestamp,
           };
 
-          // 구글 스프레드시트에 데이터 전송
           fetch(GOOGLE_SCRIPT_URL + 
             `?team=${encodeURIComponent(data.team)}&qr=${encodeURIComponent(data.qr)}&lat=${data.latitude}&lon=${data.longitude}&time=${encodeURIComponent(data.timestamp)}`)
             .then((res) => res.text())
-            .then((text) => {
+            .then(() => {
               resultDiv.textContent = "출석 완료! 데이터가 기록되었습니다.";
             })
             .catch((err) => {
@@ -70,14 +169,12 @@
       );
     }
 
-    // QR 코드 스캔 시작
     scanBtn.addEventListener("click", () => {
       const html5QrCode = new Html5Qrcode("reader");
 
       Html5Qrcode.getCameras()
         .then((devices) => {
           if (devices && devices.length) {
-            // 후면 카메라 우선 선택
             const backCamera = devices.find(camera => camera.label.toLowerCase().includes('back')) || devices[0];
             const cameraId = backCamera.id;
 
@@ -103,7 +200,6 @@
     });
   </script>
 
-  <!-- QR코드 스캔 뷰 영역 -->
-  <div id="reader" style="width: 100%; margin-top: 20px;"></div>
+  <div id="reader"></div>
 </body>
 </html>
