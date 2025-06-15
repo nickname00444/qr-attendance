@@ -2,59 +2,110 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <title>순찰 로그인</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no" />
+  <title>로그인</title>
   <style>
-    body { font-family: sans-serif; padding: 20px; max-width: 400px; margin: auto; }
-    h2 { text-align: center; }
-    label, select, input, button { display: block; width: 100%; margin-top: 15px; font-size: 18px; }
-    button { padding: 10px; cursor: pointer; }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f7f7f7;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      height: 100vh;
+      padding: 40px 20px;
+    }
+
+    #backBtn {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      font-size: 28px;
+      background: none;
+      border: none;
+      color: #2e7d32;
+      cursor: pointer;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      user-select: none;
+    }
+
+    h2 {
+      font-size: 36px;
+      margin-bottom: 40px;
+    }
+
+    select, input {
+      width: 100%;
+      max-width: 400px;
+      padding: 20px;
+      margin: 15px 0;
+      font-size: 24px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      font-size: 28px;
+      padding: 20px;
+      width: 100%;
+      max-width: 400px;
+      background-color: #2e7d32;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+
+    button:hover {
+      background-color: #276426;
+    }
   </style>
 </head>
 <body>
-  <h2>팀 선택</h2>
+  <button id="backBtn" onclick="location.href='index.html'">&lt; 뒤로가기</button>
 
-  <label for="teamSelect">팀 선택</label>
-  <select id="teamSelect" required>
-    <option value="">-- 선택하세요 --</option>
-    <option>1팀</option>
-    <option>2팀</option>
-    <option>3팀</option>
-    <option>4팀</option>
-    <option>5팀</option>
-    <option>6팀</option>
-    <option>7팀</option>
-    <option>8팀</option>
-    <option>9팀</option>
-    <option>10팀</option>
+  <h2>로그인</h2>
+
+  <select id="team">
+    <option value="">팀 선택</option>
+    <option value="1팀">1팀</option>
+    <option value="2팀">2팀</option>
+    <option value="3팀">3팀</option>
+    <option value="4팀">4팀</option>
+    <option value="5팀">5팀</option>
+    <option value="6팀">6팀</option>
+    <option value="7팀">7팀</option>
+    <option value="8팀">8팀</option>
+    <option value="9팀">9팀</option>
+    <option value="10팀">10팀</option>
   </select>
 
-  <label for="passwordInput">비밀번호</label>
-  <input
-    type="password"
-    id="passwordInput"
-    placeholder="공통 비밀번호 입력"
-    required
-  />
-
+  <input type="text" id="name" placeholder="이름을 입력하세요" />
+  <input type="password" id="password" placeholder="비밀번호를 입력하세요" />
   <button onclick="login()">로그인</button>
 
   <script>
     function login() {
-      const team = document.getElementById("teamSelect").value;
-      const pw = document.getElementById("passwordInput").value;
+      const team = document.getElementById("team").value;
+      const password = document.getElementById("password").value;
+      const name = document.getElementById("name").value;
 
-      if (!team || !pw) {
-        alert("모든 항목을 입력하세요.");
+      if (!team || !password || !name) {
+        alert("모든 항목을 입력해주세요.");
         return;
       }
 
-      const CORRECT_PASSWORD = "1234"; // 공통 비밀번호 설정 (원하는 걸로 바꾸세요)
+      const correctPassword = "1234"; // 원하는 비밀번호로 변경 가능
 
-      if (pw === CORRECT_PASSWORD) {
-        // 로그인 성공 시 팀명 저장
+      if (password === correctPassword) {
         localStorage.setItem("team", team);
-        // QR 스캔 페이지로 이동
-        window.location.href = "scan.html";
+        localStorage.setItem("name", name);
+        localStorage.setItem("isLoggedIn", "true");
+        location.href = "main.html";
       } else {
         alert("비밀번호가 틀렸습니다.");
       }
