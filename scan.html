@@ -2,13 +2,21 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>QR 코드 스캔</title>
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
   <style>
     body, html {
-      margin: 0; padding: 0; height: 100%;
+      margin: 0; padding: 0;
       font-size: 28px;
       display: flex; flex-direction: column;
+      align-items: center; justify-content: flex-start;
+      height: 100%;
+    }
+    #reader {
+      width: 100% !important;
+      max-width: 600px;
+      margin-top: 20px;
     }
     #back-button {
       font-size: 28px;
@@ -17,91 +25,83 @@
       border: none;
       color: #007bff;
       cursor: pointer;
-      text-align: left;
+      align-self: flex-start;
       user-select: none;
       outline: none;
     }
-    #reader {
-      flex: 1;
-      width: 100%;
+    h2 {
+      margin-top: 10px;
+      text-align: center;
     }
   </style>
 </head>
 <body>
 
-<button id="back-button" onclick="goBack()">&lt; 뒤로가기</button>
+  <button id="back-button" onclick="goBack()">&lt; 뒤로가기</button>
+  <h2>QR 코드 스캔 화면</h2>
+  <div id="reader"></div>
 
-<div id="reader"></div>
-
-<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-<script>
-  // 구글 앱스크립트 웹앱 URL (본인 것이 맞는지 꼭 확인하세요)
-  const SERVER_URL = 'https://script.google.com/macros/s/AKfycbzX32uMGszy7AOIa1EcwnaXrYg50fXEiAWO0F2-tjzmg87CtvNbO-JZpclwX_j0Q6LlbQ/exec';
-
-  // 로그인 페이지에서 저장한 팀 정보 불러오기
-  const team = localStorage.getItem('team') || '';
-
-  function goBack() {
-    location.href = 'index.html';
-  }
-
-  function onScanSuccess(decodedText, decodedResult) {
-    const parts = decodedText.split(',');
-    if(parts.length !== 2) {
-      alert('올바른 위치 정보가 담긴 QR 코드가 아닙니다.');
-      return;
+  <script>
+    function goBack() {
+      window.location.href = "index.html";
     }
 
-    const latitude = parts[0].trim();
-    const longitude = parts[1].trim();
-    const datetime = new Date().toISOString();
-
-    const postData = {
-      team: team,
-      qrData: decodedText,
-      latitude: latitude,
-      longitude: longitude,
-      datetime: datetime,
-    };
-
-    fetch(SERVER_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(postData),
-    })
-    .then(res => res.json())
-    .then(data => {
-      if(data.result === 'success') {
-        alert('순찰이 성공적으로 기록되었습니다.');
-      } else {
-        alert('순찰 기록에 실패했습니다.');
+    // QR 스캔 성공 시 실행
+    function onScanSuccess(decodedText, decodedResult) {
+      // decodedText는 무시 (우린 QR 코드 내용 필요 없음)
+      const team = localStorage.getItem("team");
+      if (!team) {
+        alert("로그인 정보가 없습니다. 다시 로그인 해주세요.");
+        window.location.href = "index.html";
+        return;
       }
-    })
-    .catch(err => {
-      console.error('서버 전송 오류:', err);
-      alert('서버와 연결할 수 없습니다.');
-    });
-  }
 
-  function onScanFailure(error) {
-    // 실패시 로그 출력 등 필요시 추가 가능
-  }
+      const timestamp = new Date().toLocaleString();
 
-  const html5QrCode = new Html5Qrcode("reader");
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(position => {
+          const latitude = position.coords.latitude;
+          const longitude = position.coords.longitude;
 
-  html5QrCode.start(
-    { facingMode: "environment" },
-    {
-      fps: 10,
-      qrbox: 300
-    },
-    onScanSuccess,
-    onScanFailure
-  ).catch(err => {
-    console.error("카메라 시작 실패:", err);
-    alert("카메라를 사용할 수 없습니다.");
-  });
-</script>
+          // Google Apps Script URL로 POST
+          fetch("https://script.google.com/macros/s/AKfycbzX32uMGszy7AOIa1EcwnaXrYg50fXEiAWO0F2-tjzmg87CtvNbO-JZpclwX_j0Q6LlbQ/exec", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              team,
+              timestamp,
+              latitude,
+              longitude
+            })
+          }).then(response => {
+            alert("기록되었습니다.");
+            html5QrcodeScanner.clear();
+          }).catch(error => {
+            alert("저장 실패: " + error);
+          });
+
+        }, () => {
+          alert("위치 접근이 거부되었습니다.");
+        });
+      } else {
+        alert("이 기기에서는 위치 기능을 지원하지 않습니다.");
+      }
+    }
+
+    const html5QrcodeScanner = new Html5QrcodeScanner(
+      "reader",
+      {
+        fps: 10,
+        qrbox: 250,
+        rememberLastUsedCamera: true,
+        facingMode: { exact: "environment" } // 후면 카메라 기본
+      },
+      false
+    );
+    html5QrcodeScanner.render(onScanSuccess);
+  </script>
 
 </body>
 </html>
