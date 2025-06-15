@@ -3,15 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
-  <title>QR 출석</title>
+  <title>QR 코드 스캔</title>
   <style>
     body {
+      margin: 0;
       font-family: sans-serif;
-      background-color: #f0f0f0;
-      padding: 20px;
+      background-color: #f1f1f1;
       display: flex;
       flex-direction: column;
       align-items: center;
+      height: 100vh;
     }
 
     #backBtn {
@@ -24,108 +25,68 @@
       color: #2e7d32;
       font-weight: bold;
       cursor: pointer;
+      z-index: 10;
     }
 
     h2 {
       font-size: 64px;
       margin-top: 100px;
+      margin-bottom: 40px;
     }
 
-    p {
-      font-size: 48px;
-      margin: 20px 0;
-    }
-
-    #scanBtn {
-      font-size: 48px;
-      padding: 30px;
-      width: 90%;
+    #video {
+      width: 100vw;
       max-width: 600px;
-      background-color: #2e7d32;
-      color: white;
-      border: none;
+      height: auto;
       border-radius: 16px;
-      cursor: pointer;
-      margin-top: 40px;
-    }
-
-    #reader {
-      margin-top: 40px;
-      width: 100%;
-      max-width: 600px;
-      height: 60vh;
-      border-radius: 16px;
-      background-color: #000;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
     }
 
     #result {
-      font-size: 40px;
-      margin-top: 30px;
-      color: #333;
+      font-size: 48px;
+      margin-top: 40px;
+      word-break: break-all;
+      max-width: 90vw;
+      text-align: center;
+      color: #2e7d32;
     }
   </style>
 </head>
 <body>
+
   <button id="backBtn" onclick="location.href='login.html'">&lt; 뒤로가기</button>
+  <h2>QR 코드 스캔</h2>
 
-  <h2>QR코드 출석</h2>
-  <p>팀: <span id="teamName"></span></p>
-  <p>이름: <span id="userName"></span></p>
+  <video id="video" playsinline></video>
+  <div id="result">스캔 결과가 여기에 표시됩니다.</div>
 
-  <button id="scanBtn">📷 QR 코드 스캔 시작</button>
-  <div id="result"></div>
-  <div id="reader"></div>
-
-  <script src="https://unpkg.com/html5-qrcode"></script>
+  <script src="https://unpkg.com/@zxing/library@latest"></script>
   <script>
-    const team = localStorage.getItem("team") || "알 수 없음";
-    const name = localStorage.getItem("name") || "이름 없음";
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycb.../exec"; // 스프레드시트 URL로 변경
+    const codeReader = new ZXing.BrowserQRCodeReader();
+    const videoElement = document.getElementById('video');
+    const resultElement = document.getElementById('result');
 
-    document.getElementById("teamName").textContent = team;
-    document.getElementById("userName").textContent = name;
+    // 후면 카메라 우선 사용 설정
+    codeReader.getVideoInputDevices()
+      .then(videoInputDevices => {
+        const rearCamera = videoInputDevices.find(device => device.label.toLowerCase().includes('back')) || videoInputDevices[0];
+        codeReader.decodeFromVideoDevice(rearCamera.deviceId, videoElement, (result, err) => {
+          if (result) {
+            // 스캔 성공시 결과 출력
+            resultElement.textContent = result.text;
+            console.log('QR 코드:', result.text);
 
-    function getLocationAndSend(qrData) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const { latitude, longitude } = pos.coords;
-          const timestamp = new Date().toLocaleString();
+            // TODO: 이곳에 서버(구글 스프레드시트) 전송 코드 추가 가능
 
-          fetch(GOOGLE_SCRIPT_URL +
-            `?team=${encodeURIComponent(team)}&name=${encodeURIComponent(name)}&qr=${encodeURIComponent(qrData)}&lat=${latitude}&lon=${longitude}&time=${encodeURIComponent(timestamp)}`)
-            .then((res) => res.text())
-            .then(() => {
-              document.getElementById("result").textContent = "✅ 출석 완료!";
-            })
-            .catch((err) => {
-              document.getElementById("result").textContent = "❌ 오류 발생!";
-              console.error(err);
-            });
-        },
-        () => {
-          alert("위치 정보를 가져올 수 없습니다.");
-        }
-      );
-    }
-
-    document.getElementById("scanBtn").addEventListener("click", () => {
-      const html5QrCode = new Html5Qrcode("reader");
-
-      Html5Qrcode.getCameras()
-        .then((devices) => {
-          const backCam = devices.find(d => d.label.toLowerCase().includes("back")) || devices[0];
-          html5QrCode.start(
-            backCam.id,
-            { fps: 10, qrbox: { width: 400, height: 400 } },
-            (decodedText) => {
-              html5QrCode.stop();
-              getLocationAndSend(decodedText);
-            },
-            (errorMessage) => { /* 무시 */ }
-          );
-        })
-        .catch(() => alert("카메라를 사용할 수 없습니다."));
-    });
+            codeReader.reset(); // 스캔 중지
+          }
+          if (err && !(err instanceof ZXing.NotFoundException)) {
+            console.error(err);
+          }
+        });
+      })
+      .catch(err => console.error(err));
   </script>
+
 </body>
 </html>
