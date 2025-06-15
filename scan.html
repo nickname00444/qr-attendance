@@ -35,18 +35,17 @@
 
 <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 <script>
-  const SERVER_URL = 'https://your-google-apps-script-webapp-url'; // 실제 서버 주소로 변경하세요
+  // 구글 앱스크립트 웹앱 URL (본인 것이 맞는지 꼭 확인하세요)
+  const SERVER_URL = 'https://script.google.com/macros/s/AKfycbzX32uMGszy7AOIa1EcwnaXrYg50fXEiAWO0F2-tjzmg87CtvNbO-JZpclwX_j0Q6LlbQ/exec';
 
   // 로그인 페이지에서 저장한 팀 정보 불러오기
   const team = localStorage.getItem('team') || '';
 
   function goBack() {
-    // 뒤로가기 누르면 로그인 페이지로 돌아가기
     location.href = 'index.html';
   }
 
   function onScanSuccess(decodedText, decodedResult) {
-    // QR 코드 내용 예: "37.5665,126.9780"
     const parts = decodedText.split(',');
     if(parts.length !== 2) {
       alert('올바른 위치 정보가 담긴 QR 코드가 아닙니다.');
@@ -65,7 +64,6 @@
       datetime: datetime,
     };
 
-    // 서버에 출석 정보 전송
     fetch(SERVER_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -86,20 +84,17 @@
   }
 
   function onScanFailure(error) {
-    // 스캔 실패 시 동작(필요하면 로그 등)
+    // 실패시 로그 출력 등 필요시 추가 가능
   }
 
-  // 후면 카메라 자동 실행 설정
   const html5QrCode = new Html5Qrcode("reader");
-  const config = {
-    fps: 10,
-    qrbox: 300,
-    facingMode: { exact: "environment" }  // 후면 카메라 지정
-  };
 
   html5QrCode.start(
-    config.facingMode,
-    config,
+    { facingMode: "environment" },
+    {
+      fps: 10,
+      qrbox: 300
+    },
     onScanSuccess,
     onScanFailure
   ).catch(err => {
