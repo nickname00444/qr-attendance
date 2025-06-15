@@ -1,101 +1,104 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
-  <title>로그인</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      background-color: #f1f1f1;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding-top: 100px;
-    }
-
-    #backBtn {
-      position: absolute;
-      top: 30px;
-      left: 20px;
-      font-size: 48px;
-      background: none;
-      border: none;
-      color: #2e7d32;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    h2 {
-      font-size: 64px;
-      margin-bottom: 80px;
-    }
-
-    select, input, button {
-      font-size: 48px;
-      width: 90%;
-      max-width: 600px;
-      padding: 30px;
-      margin-bottom: 50px;
-      border-radius: 16px;
-      border: 2px solid #ccc;
-    }
-
-    button {
-      background-color: #2e7d32;
-      color: white;
-      border: none;
-    }
-
-    button:hover {
-      background-color: #276426;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<title>로그인</title>
+<style>
+  body {
+    margin: 0; padding: 0;
+    font-family: sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100vh;
+    background: #f5f5f5;
+  }
+  #backBtn {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    font-size: 48px;
+    background: none;
+    border: none;
+    color: #2e7d32;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 10;
+  }
+  h1 {
+    margin-top: 100px;
+    font-size: 64px;
+    color: #2e7d32;
+  }
+  select, input[type=password], button {
+    width: 80vw;
+    max-width: 400px;
+    font-size: 48px;
+    padding: 15px;
+    margin: 20px 0;
+    border-radius: 12px;
+    border: 2px solid #2e7d32;
+  }
+  button {
+    background-color: #2e7d32;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  button:active {
+    background-color: #1b4d20;
+  }
+</style>
 </head>
 <body>
-  <button id="backBtn" onclick="location.href='index.html'">&lt; 뒤로가기</button>
 
-  <h2>로그인</h2>
+<button id="backBtn" onclick="history.back()">&lt; 뒤로가기</button>
 
-  <select id="team">
-    <option value="">팀 선택</option>
-    <option value="1팀">1팀</option>
-    <option value="2팀">2팀</option>
-    <option value="3팀">3팀</option>
-    <option value="4팀">4팀</option>
-    <option value="5팀">5팀</option>
-    <option value="6팀">6팀</option>
-    <option value="7팀">7팀</option>
-    <option value="8팀">8팀</option>
-    <option value="9팀">9팀</option>
-    <option value="10팀">10팀</option>
-  </select>
+<h1>로그인</h1>
 
-  <input type="password" id="password" placeholder="비밀번호를 입력하세요" />
-  <button onclick="login()">로그인</button>
+<select id="teamSelect" required>
+  <option value="" disabled selected>팀 선택</option>
+  <option value="1팀">1팀</option>
+  <option value="2팀">2팀</option>
+  <option value="3팀">3팀</option>
+  <option value="4팀">4팀</option>
+  <option value="5팀">5팀</option>
+  <option value="6팀">6팀</option>
+  <option value="7팀">7팀</option>
+  <option value="8팀">8팀</option>
+  <option value="9팀">9팀</option>
+  <option value="10팀">10팀</option>
+</select>
 
-  <script>
-    function login() {
-      const team = document.getElementById("team").value;
-      const password = document.getElementById("password").value;
+<input type="password" id="password" placeholder="비밀번호 입력" required />
 
-      if (!team || !password) {
-        alert("팀과 비밀번호를 모두 입력해주세요.");
-        return;
-      }
+<button id="loginBtn">로그인</button>
 
-      const correctPassword = "1234"; // ← 실제 사용할 비밀번호로 바꾸세요
+<script>
+  const correctPassword = "비밀번호정하기"; // 실제 배포 전 변경할 것
 
-      if (password === correctPassword) {
-        localStorage.setItem("team", team);
-        localStorage.setItem("isLoggedIn", "true");
-        location.href = "main.html";
-      } else {
-        alert("비밀번호가 틀렸습니다.");
-      }
+  document.getElementById("loginBtn").addEventListener("click", () => {
+    const team = document.getElementById("teamSelect").value;
+    const password = document.getElementById("password").value;
+
+    if (!team) {
+      alert("팀을 선택해주세요.");
+      return;
     }
-  </script>
+    if (!password) {
+      alert("비밀번호를 입력해주세요.");
+      return;
+    }
+
+    if (password === correctPassword) {
+      localStorage.setItem("team", team);
+      location.href = "main.html";
+    } else {
+      alert("비밀번호가 틀렸습니다.");
+    }
+  });
+</script>
+
 </body>
 </html>
