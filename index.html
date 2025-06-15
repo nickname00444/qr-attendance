@@ -13,6 +13,7 @@
     align-items: center;
     height: 100vh;
     background: #f5f5f5;
+    position: relative;
   }
   #backBtn {
     position: absolute;
@@ -25,7 +26,7 @@
     font-weight: bold;
     cursor: pointer;
     z-index: 10;
-    display: none; /* 로그인 페이지에는 뒤로가기 버튼 필요 없으니 숨김 */
+    display: none; /* 로그인 페이지에는 뒤로가기 버튼 숨김 */
   }
   h1 {
     margin-top: 100px;
@@ -55,6 +56,7 @@
 <body>
 
 <!-- 로그인 페이지는 뒤로가기 버튼 없음 -->
+<button id="backBtn" onclick="history.back()">&lt; 뒤로가기</button>
 
 <h1>로그인</h1>
 
@@ -77,7 +79,7 @@
 <button id="loginBtn">로그인</button>
 
 <script>
-  const correctPassword = "1234"; // 실제 비밀번호로 변경
+  const correctPassword = "your_password_here"; // 실제 비밀번호로 변경하세요
 
   document.getElementById("loginBtn").addEventListener("click", () => {
     const team = document.getElementById("teamSelect").value;
