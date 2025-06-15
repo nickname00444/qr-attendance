@@ -2,13 +2,15 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-  <title>QR코드 출석</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no" />
+  <title>QR 출석</title>
   <style>
     html, body {
-      margin: 0; padding: 0; height: 100%;
-      font-family: sans-serif;
-      background: #f9f9f9;
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: 'Arial', sans-serif;
+      background-color: #f0f0f0;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -17,61 +19,60 @@
     }
 
     body {
-      padding: 10px;
       box-sizing: border-box;
+      padding: 20px;
       position: relative;
     }
 
-    /* 뒤로가기 버튼 스타일 */
+    /* 뒤로가기 버튼 */
     #backBtn {
       position: absolute;
-      top: 10px;
-      left: 10px;
-      font-size: 18px;
+      top: 20px;
+      left: 20px;
+      font-size: 24px;
       background: none;
       border: none;
       color: #2e7d32;
       cursor: pointer;
-      font-weight: 600;
+      font-weight: bold;
       display: flex;
       align-items: center;
-      gap: 5px;
+      gap: 8px;
       user-select: none;
-      padding: 5px 10px;
-      border-radius: 5px;
+      padding: 8px 16px;
+      border-radius: 8px;
       transition: background-color 0.3s ease;
     }
 
     #backBtn:hover {
-      background-color: rgba(46,125,50,0.1);
+      background-color: rgba(46, 125, 50, 0.1);
     }
 
     h2 {
-      margin: 10px 0;
-      font-size: 24px;
+      font-size: 32px;
+      margin-top: 60px;
+      margin-bottom: 20px;
       text-align: center;
-      width: 100%;
     }
 
     p {
-      font-size: 18px;
-      width: 100%;
-      text-align: center;
-      margin: 5px 0 15px 0;
+      font-size: 24px;
+      margin: 10px 0;
       font-weight: 600;
     }
 
     #scanBtn {
-      font-size: 22px;
-      padding: 15px;
-      width: 100%;
+      font-size: 28px;
+      padding: 20px;
+      width: 90%;
+      max-width: 400px;
       cursor: pointer;
       background-color: #2e7d32;
       color: white;
       border: none;
-      border-radius: 6px;
-      box-shadow: 0 3px 6px rgba(0,0,0,0.2);
-      transition: background-color 0.3s ease;
+      border-radius: 10px;
+      margin-top: 20px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
     }
 
     #scanBtn:hover {
@@ -79,127 +80,110 @@
     }
 
     #result {
-      margin-top: 15px;
-      font-size: 18px;
+      margin-top: 20px;
+      font-size: 24px;
       font-weight: 600;
       color: #444;
       text-align: center;
-      min-height: 30px;
-      width: 100%;
+      min-height: 40px;
     }
 
     #reader {
-      margin-top: 15px;
+      margin-top: 20px;
       width: 100%;
-      flex-grow: 1;
-      max-height: 70vh;
-      border-radius: 8px;
+      max-width: 500px;
+      height: 60vh;
+      border-radius: 12px;
       overflow: hidden;
-      box-shadow: 0 0 10px rgba(0,0,0,0.15);
       background: black;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
     }
   </style>
 </head>
 <body>
-  <!-- 뒤로가기 버튼 -->
   <button id="backBtn">&lt; 뒤로가기</button>
 
   <h2>QR코드 출석</h2>
   <p>팀: <span id="teamName"></span></p>
+  <p>이름: <span id="userName"></span></p>
 
-  <button id="scanBtn">QR 코드 스캔 시작</button>
-
+  <button id="scanBtn">📷 QR 코드 스캔 시작</button>
   <div id="result"></div>
+  <div id="reader"></div>
 
   <script src="https://unpkg.com/html5-qrcode"></script>
   <script>
     const team = localStorage.getItem("team") || "알 수 없음";
+    const name = localStorage.getItem("name") || "이름 없음";
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycb.../exec"; // 실제 Google Script URL로 바꾸세요
+
     document.getElementById("teamName").textContent = team;
+    document.getElementById("userName").textContent = name;
 
-    const scanBtn = document.getElementById("scanBtn");
-    const resultDiv = document.getElementById("result");
-    const backBtn = document.getElementById("backBtn");
-
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx.../exec";
-
-    backBtn.addEventListener("click", () => {
+    document.getElementById("backBtn").addEventListener("click", () => {
       const isLoggedIn = localStorage.getItem("isLoggedIn");
-      if (isLoggedIn === "true") {
-        location.href = "main.html"; // 로그인 완료 후 이동할 메인 페이지 경로로 수정하세요
-      } else {
-        location.href = "login.html"; // 로그인 전 이동할 로그인 페이지 경로로 수정하세요
-      }
+      location.href = isLoggedIn === "true" ? "main.html" : "login.html";
     });
 
     function getLocationAndSend(qrData) {
       if (!navigator.geolocation) {
-        alert("위치 정보를 지원하지 않는 브라우저입니다.");
+        alert("위치 정보를 지원하지 않습니다.");
         return;
       }
 
       navigator.geolocation.getCurrentPosition(
         (pos) => {
           const { latitude, longitude } = pos.coords;
-          const now = new Date();
-          const timestamp = now.toLocaleString();
+          const now = new Date().toLocaleString();
 
           const data = {
             team: team,
+            name: name,
             qr: qrData,
             latitude: latitude,
             longitude: longitude,
-            timestamp: timestamp,
+            timestamp: now,
           };
 
-          fetch(GOOGLE_SCRIPT_URL + 
-            `?team=${encodeURIComponent(data.team)}&qr=${encodeURIComponent(data.qr)}&lat=${data.latitude}&lon=${data.longitude}&time=${encodeURIComponent(data.timestamp)}`)
+          fetch(GOOGLE_SCRIPT_URL +
+            `?team=${encodeURIComponent(data.team)}&name=${encodeURIComponent(data.name)}&qr=${encodeURIComponent(data.qr)}&lat=${data.latitude}&lon=${data.longitude}&time=${encodeURIComponent(data.timestamp)}`)
             .then((res) => res.text())
             .then(() => {
-              resultDiv.textContent = "출석 완료! 데이터가 기록되었습니다.";
+              document.getElementById("result").textContent = "✅ 출석 완료!";
             })
             .catch((err) => {
-              resultDiv.textContent = "데이터 전송 중 오류가 발생했습니다.";
+              document.getElementById("result").textContent = "❌ 오류 발생!";
               console.error(err);
             });
         },
         (err) => {
           alert("위치 정보를 가져오지 못했습니다.");
-          console.error(err);
         }
       );
     }
 
-    scanBtn.addEventListener("click", () => {
+    document.getElementById("scanBtn").addEventListener("click", () => {
       const html5QrCode = new Html5Qrcode("reader");
 
       Html5Qrcode.getCameras()
         .then((devices) => {
-          if (devices && devices.length) {
-            const backCamera = devices.find(camera => camera.label.toLowerCase().includes('back')) || devices[0];
-            const cameraId = backCamera.id;
+          const backCam = devices.find(d => d.label.toLowerCase().includes('back')) || devices[0];
+          const cameraId = backCam.id;
 
-            html5QrCode.start(
-              cameraId,
-              { fps: 10, qrbox: 250 },
-              (decodedText) => {
-                html5QrCode.stop();
-                getLocationAndSend(decodedText);
-              },
-              (errorMessage) => {
-                // 스캔 실패 시 무시
-              }
-            );
-          } else {
-            alert("사용 가능한 카메라가 없습니다.");
-          }
+          html5QrCode.start(
+            cameraId,
+            { fps: 10, qrbox: { width: 250, height: 250 } },
+            (decodedText) => {
+              html5QrCode.stop();
+              getLocationAndSend(decodedText);
+            },
+            (errorMessage) => { }
+          );
         })
         .catch((err) => {
-          alert("카메라를 사용할 수 없습니다.");
-          console.error(err);
+          alert("카메라 접근 실패");
         });
     });
   </script>
-
-  <div id="reader"></div>
 </body>
 </html>
