@@ -2,62 +2,51 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
   <title>로그인</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background-color: #f7f7f7;
+      font-family: sans-serif;
+      background-color: #f1f1f1;
+      margin: 0;
+      padding: 0;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: flex-start;
-      height: 100vh;
-      padding: 40px 20px;
+      padding-top: 100px;
     }
 
     #backBtn {
       position: absolute;
-      top: 20px;
+      top: 30px;
       left: 20px;
-      font-size: 28px;
+      font-size: 48px;
       background: none;
       border: none;
       color: #2e7d32;
-      cursor: pointer;
       font-weight: bold;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      user-select: none;
+      cursor: pointer;
     }
 
     h2 {
-      font-size: 36px;
-      margin-bottom: 40px;
+      font-size: 64px;
+      margin-bottom: 80px;
     }
 
-    select, input {
-      width: 100%;
-      max-width: 400px;
-      padding: 20px;
-      margin: 15px 0;
-      font-size: 24px;
-      border-radius: 10px;
-      border: 1px solid #ccc;
+    select, input, button {
+      font-size: 48px;
+      width: 90%;
+      max-width: 600px;
+      padding: 30px;
+      margin-bottom: 50px;
+      border-radius: 16px;
+      border: 2px solid #ccc;
     }
 
     button {
-      font-size: 28px;
-      padding: 20px;
-      width: 100%;
-      max-width: 400px;
       background-color: #2e7d32;
       color: white;
       border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      margin-top: 20px;
     }
 
     button:hover {
@@ -99,7 +88,7 @@
         return;
       }
 
-      const correctPassword = "1234"; // 원하는 비밀번호로 변경 가능
+      const correctPassword = "1234"; // 비밀번호 설정
 
       if (password === correctPassword) {
         localStorage.setItem("team", team);

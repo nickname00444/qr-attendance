@@ -2,13 +2,13 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
   <title>QR 출석</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: sans-serif;
       background-color: #f0f0f0;
-      padding: 30px 20px;
+      padding: 20px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -16,56 +16,52 @@
 
     #backBtn {
       position: absolute;
-      top: 20px;
+      top: 30px;
       left: 20px;
-      font-size: 28px;
+      font-size: 48px;
       background: none;
       border: none;
       color: #2e7d32;
-      cursor: pointer;
       font-weight: bold;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      user-select: none;
+      cursor: pointer;
     }
 
     h2 {
-      font-size: 36px;
-      margin-top: 60px;
+      font-size: 64px;
+      margin-top: 100px;
     }
 
     p {
-      font-size: 28px;
-      margin: 10px 0;
+      font-size: 48px;
+      margin: 20px 0;
     }
 
     #scanBtn {
-      font-size: 28px;
-      padding: 20px;
+      font-size: 48px;
+      padding: 30px;
       width: 90%;
-      max-width: 400px;
-      margin-top: 30px;
+      max-width: 600px;
       background-color: #2e7d32;
       color: white;
       border: none;
-      border-radius: 10px;
+      border-radius: 16px;
       cursor: pointer;
+      margin-top: 40px;
     }
 
     #reader {
-      margin-top: 20px;
+      margin-top: 40px;
       width: 100%;
-      max-width: 500px;
-      height: 65vh;
-      border-radius: 12px;
-      background: black;
+      max-width: 600px;
+      height: 60vh;
+      border-radius: 16px;
+      background-color: #000;
     }
 
     #result {
-      font-size: 24px;
-      margin-top: 20px;
-      min-height: 30px;
+      font-size: 40px;
+      margin-top: 30px;
+      color: #333;
     }
   </style>
 </head>
@@ -75,8 +71,8 @@
   <h2>QR코드 출석</h2>
   <p>팀: <span id="teamName"></span></p>
   <p>이름: <span id="userName"></span></p>
-  <button id="scanBtn">📷 QR 코드 스캔 시작</button>
 
+  <button id="scanBtn">📷 QR 코드 스캔 시작</button>
   <div id="result"></div>
   <div id="reader"></div>
 
@@ -84,7 +80,7 @@
   <script>
     const team = localStorage.getItem("team") || "알 수 없음";
     const name = localStorage.getItem("name") || "이름 없음";
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycb.../exec"; // 실제 URL로 변경
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycb.../exec"; // 스프레드시트 URL로 변경
 
     document.getElementById("teamName").textContent = team;
     document.getElementById("userName").textContent = name;
@@ -106,8 +102,8 @@
               console.error(err);
             });
         },
-        (err) => {
-          alert("위치 정보를 가져오지 못했습니다.");
+        () => {
+          alert("위치 정보를 가져올 수 없습니다.");
         }
       );
     }
@@ -117,10 +113,10 @@
 
       Html5Qrcode.getCameras()
         .then((devices) => {
-          const backCam = devices.find(d => d.label.toLowerCase().includes('back')) || devices[0];
+          const backCam = devices.find(d => d.label.toLowerCase().includes("back")) || devices[0];
           html5QrCode.start(
             backCam.id,
-            { fps: 10, qrbox: { width: 300, height: 300 } },
+            { fps: 10, qrbox: { width: 400, height: 400 } },
             (decodedText) => {
               html5QrCode.stop();
               getLocationAndSend(decodedText);
