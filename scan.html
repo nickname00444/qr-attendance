@@ -1,92 +1,86 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
-  <title>QR 코드 스캔</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: sans-serif;
-      background-color: #f1f1f1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      height: 100vh;
-    }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<title>QR 코드 스캔</title>
+<style>
+  body {
+    margin: 0; padding: 0;
+    font-family: sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100vh;
+    background: #f1f1f1;
+  }
 
-    #backBtn {
-      position: absolute;
-      top: 30px;
-      left: 20px;
-      font-size: 48px;
-      background: none;
-      border: none;
-      color: #2e7d32;
-      font-weight: bold;
-      cursor: pointer;
-      z-index: 10;
-    }
+  #backBtn {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    font-size: 48px;
+    background: none;
+    border: none;
+    color: #2e7d32;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 10;
+  }
 
-    h2 {
-      font-size: 64px;
-      margin-top: 100px;
-      margin-bottom: 40px;
-    }
+  h2 {
+    margin-top: 100px;
+    font-size: 64px;
+    color: #2e7d32;
+  }
 
-    #video {
-      width: 100vw;
-      max-width: 600px;
-      height: auto;
-      border-radius: 16px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.3);
-    }
+  #video {
+    width: 100vw;
+    max-width: 600px;
+    border-radius: 16px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+  }
 
-    #result {
-      font-size: 48px;
-      margin-top: 40px;
-      word-break: break-all;
-      max-width: 90vw;
-      text-align: center;
-      color: #2e7d32;
-    }
-  </style>
+  #result {
+    margin-top: 40px;
+    font-size: 48px;
+    max-width: 90vw;
+    word-break: break-word;
+    text-align: center;
+    color: #2e7d32;
+  }
+</style>
 </head>
 <body>
 
-  <button id="backBtn" onclick="location.href='login.html'">&lt; 뒤로가기</button>
-  <h2>QR 코드 스캔</h2>
+<button id="backBtn" onclick="location.href='login.html'">&lt; 뒤로가기</button>
 
-  <video id="video" playsinline></video>
-  <div id="result">스캔 결과가 여기에 표시됩니다.</div>
+<h2>QR 코드 스캔</h2>
 
-  <script src="https://unpkg.com/@zxing/library@latest"></script>
-  <script>
-    const codeReader = new ZXing.BrowserQRCodeReader();
-    const videoElement = document.getElementById('video');
-    const resultElement = document.getElementById('result');
+<video id="video" playsinline></video>
+<div id="result">스캔 결과가 여기에 표시됩니다.</div>
 
-    // 후면 카메라 우선 사용 설정
-    codeReader.getVideoInputDevices()
-      .then(videoInputDevices => {
-        const rearCamera = videoInputDevices.find(device => device.label.toLowerCase().includes('back')) || videoInputDevices[0];
-        codeReader.decodeFromVideoDevice(rearCamera.deviceId, videoElement, (result, err) => {
-          if (result) {
-            // 스캔 성공시 결과 출력
-            resultElement.textContent = result.text;
-            console.log('QR 코드:', result.text);
+<script src="https://unpkg.com/@zxing/library@latest"></script>
+<script>
+  const codeReader = new ZXing.BrowserQRCodeReader();
+  const videoElement = document.getElementById('video');
+  const resultElement = document.getElementById('result');
 
-            // TODO: 이곳에 서버(구글 스프레드시트) 전송 코드 추가 가능
-
-            codeReader.reset(); // 스캔 중지
-          }
-          if (err && !(err instanceof ZXing.NotFoundException)) {
-            console.error(err);
-          }
-        });
-      })
-      .catch(err => console.error(err));
-  </script>
+  codeReader.getVideoInputDevices()
+    .then(videoInputDevices => {
+      const rearCamera = videoInputDevices.find(device => device.label.toLowerCase().includes('back')) || videoInputDevices[0];
+      codeReader.decodeFromVideoDevice(rearCamera.deviceId, videoElement, (result, err) => {
+        if (result) {
+          resultElement.textContent = result.text;
+          codeReader.reset();
+        }
+        if (err && !(err instanceof ZXing.NotFoundException)) {
+          console.error(err);
+        }
+      });
+    })
+    .catch(err => console.error(err));
+</script>
 
 </body>
 </html>
