@@ -73,7 +73,6 @@
     <option value="10팀">10팀</option>
   </select>
 
-  <input type="text" id="name" placeholder="이름을 입력하세요" />
   <input type="password" id="password" placeholder="비밀번호를 입력하세요" />
   <button onclick="login()">로그인</button>
 
@@ -81,10 +80,9 @@
     function login() {
       const team = document.getElementById("team").value;
       const password = document.getElementById("password").value;
-      const name = document.getElementById("name").value;
 
-      if (!team || !password || !name) {
-        alert("모든 항목을 입력해주세요.");
+      if (!team || !password) {
+        alert("팀과 비밀번호를 모두 입력해주세요.");
         return;
       }
 
@@ -92,7 +90,6 @@
 
       if (password === correctPassword) {
         localStorage.setItem("team", team);
-        localStorage.setItem("name", name);
         localStorage.setItem("isLoggedIn", "true");
         location.href = "main.html";
       } else {
