@@ -90,7 +90,6 @@
 
 <script>
   function goBack() {
-    // 로그인 화면이 첫 화면이라면 뒤로가기 시 아무 행동 없거나 필요시 수정
     alert("첫 화면입니다.");
   }
 
@@ -98,7 +97,7 @@
     e.preventDefault();
     const team = document.getElementById('team').value;
     const password = document.getElementById('password').value;
-    const correctPassword = 'your_password_here'; // 여기 비밀번호 설정
+    const correctPassword = '1234'; // ✅ 비밀번호 설정
 
     if (password !== correctPassword) {
       alert('비밀번호가 틀렸습니다.');
