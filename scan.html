@@ -42,13 +42,26 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
+    // 마지막 스캔 저장 시간 기록 (밀리초 단위)
+    let lastScanTime = 0;
+
     // QR 코드 스캔 성공 시 실행될 함수
     async function onScanSuccess(decodedText, decodedResult) {
+      const now = Date.now();
+      if (now - lastScanTime < 5000) { // 5초 이내 중복 저장 방지
+        return;
+      }
+      lastScanTime = now;
+
       const team = localStorage.getItem('team') || '';
-      const name = localStorage.getItem('name') || '';
       const datetime = new Date().toISOString();
 
-      // 위치 정보 가져오기
+      if (!team) {
+        alert("팀 정보가 없습니다. 다시 로그인해주세요.");
+        location.href = "index.html";
+        return;
+      }
+
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(async position => {
           const latitude = position.coords.latitude;
@@ -57,15 +70,14 @@
           try {
             await addDoc(collection(db, "attendance"), {
               team: team,
-              name: name,
               datetime: datetime,
               latitude: latitude,
               longitude: longitude
             });
-            alert("출석이 성공적으로 저장되었습니다.");
+            alert("순찰이 저장되었습니다.");
           } catch (e) {
             console.error("Firestore 저장 실패:", e);
-            alert("저장 중 오류 발생");
+            alert("저장 중 오류가 발생했습니다.");
           }
         }, err => {
           alert("위치 정보를 가져올 수 없습니다.");
@@ -76,7 +88,7 @@
     }
 
     function onScanFailure(error) {
-      // 실패 시 무시하거나 로그를 출력할 수 있음
+      // QR 인식 실패 시 처리할 내용 (선택사항)
     }
 
     const html5QrCode = new Html5Qrcode("reader");
