@@ -26,6 +26,11 @@
       width: 100%;
     }
   </style>
+
+  <!-- ✅ html5-qrcode 먼저 로드 -->
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
+  <!-- ✅ Firebase 및 스캔 로직 -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -42,15 +47,11 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // 마지막 스캔 저장 시간 기록 (밀리초 단위)
     let lastScanTime = 0;
 
-    // QR 코드 스캔 성공 시 실행될 함수
     async function onScanSuccess(decodedText, decodedResult) {
       const now = Date.now();
-      if (now - lastScanTime < 10000) { // 10초 이내 중복 저장 방지
-        return;
-      }
+      if (now - lastScanTime < 10000) return; // 10초 내 중복 방지
       lastScanTime = now;
 
       const team = localStorage.getItem('team') || '';
@@ -69,10 +70,10 @@
 
           try {
             await addDoc(collection(db, "attendance"), {
-              team: team,
-              datetime: datetime,
-              latitude: latitude,
-              longitude: longitude
+              team,
+              datetime,
+              latitude,
+              longitude
             });
             alert("순찰이 저장되었습니다.");
           } catch (e) {
@@ -88,24 +89,27 @@
     }
 
     function onScanFailure(error) {
-      // QR 인식 실패 시 처리할 내용 (선택사항)
+      // 실패 시 콘솔 출력 (선택사항)
+      // console.warn(`QR 스캔 실패: ${error}`);
     }
 
-    const html5QrCode = new Html5Qrcode("reader");
-    html5QrCode.start(
-      { facingMode: "environment" },
-      { fps: 10, qrbox: 300 },
-      onScanSuccess,
-      onScanFailure
-    ).catch(err => {
-      console.error("카메라 시작 실패:", err);
-      alert("카메라를 사용할 수 없습니다.");
-    });
+    // ✅ DOM 완전히 로드 후 실행
+    window.onload = function () {
+      const html5QrCode = new Html5Qrcode("reader");
+      html5QrCode.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: 300 },
+        onScanSuccess,
+        onScanFailure
+      ).catch(err => {
+        console.error("카메라 시작 실패:", err);
+        alert("카메라를 사용할 수 없습니다.");
+      });
+    };
   </script>
-  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 </head>
 <body>
-  <button id="back-button" onclick="location.href='index.html'">&lt; 뒤로가기</button>
-  <div id="reader"></div>
+<button id="back-button" onclick="location.href='index.html'">&lt; 뒤로가기</button>
+<div id="reader"></div>
 </body>
 </html>
